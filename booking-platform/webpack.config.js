@@ -1,5 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
+const dotenv = require('dotenv')
 const CopyPlugin = require('copy-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -160,6 +161,14 @@ const imageminPlugin = new ImageminPlugin({
 })
 
 function botonicDevConfig(mode) {
+  // call dotenv and it will return an Object with a parsed key
+  const env = dotenv.config().parsed;
+  // reduce it to a nice object, the same as before
+  const envKeys = Object.keys(env).reduce((prev, next) => {
+    prev[`process.env.${next}`] = JSON.stringify(env[next]);
+    return prev;
+  }, {});
+
   return {
     mode: mode,
     devtool: sourceMap(mode),
@@ -198,6 +207,7 @@ function botonicDevConfig(mode) {
         IS_NODE: false,
         HUBTYPE_API_URL: JSON.stringify(process.env.HUBTYPE_API_URL),
       }),
+      new webpack.DefinePlugin(envKeys),
     ],
   }
 }
@@ -315,7 +325,19 @@ function botonicNodeConfig(mode) {
   }
 }
 
-module.exports = function (env, argv) {
+module.exports = (env, argv) => {
+  // call dotenv and it will return an Object with a parsed key
+  // const envNew = dotenv.config().parsed;
+  // // reduce it to a nice object, the same as before
+  // const envKeys = Object.keys(envNew).reduce((prev, next) => {
+  //   prev[`process.env.${next}`] = JSON.stringify(envNew[next]);
+  //   return prev;
+  // }, {});
+  // return {
+  //   plugins: [
+  //     new webpack.DefinePlugin(envKeys)
+  //   ]
+  // };
   if (env.target === BOTONIC_TARGETS.ALL) {
     return [
       botonicNodeConfig(argv.mode),
@@ -330,6 +352,8 @@ module.exports = function (env, argv) {
     return [botonicWebviewsConfig(argv.mode)]
   } else if (env.target === BOTONIC_TARGETS.WEBCHAT) {
     return [botonicWebchatConfig(argv.mode)]
+  } else if (env.target === 'self-hosted') {
+    return [botonicSelfHostedConfig(argv.mode)]
   } else {
     return null
   }
