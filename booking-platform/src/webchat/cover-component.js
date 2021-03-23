@@ -1,121 +1,91 @@
-import React from 'react'
-import styled from 'styled-components'
-import { WebchatContext } from '@botonic/react'
-import { emailRegex, MyTextField } from '../utils'
+import React from "react";
+import styled from "styled-components";
+import { WebchatContext } from "@botonic/react";
+
+const FIRST_FLOW_ID = '4nbDlkU4r0h3yfAeaqwKiL'
 
 const Container = styled.div`
   position: absolute;
-  height: 432px;
-  width: calc(100%-60px);
+  height: 100%;
+  width: 100%;
   left: 0;
-  top: 48px;
-  background: white;
+  top: 80px;
+  background: #d1d1d1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0px 30px 20px 30px;
+  padding: 0px;
   z-index: 3;
-`
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  @media (min-width: 768px) {
+    height: 370px;
+  }
+`;
+
+const WelcomeIcon = styled.div`
+  /* margin-top: 7rem; */
+`;
+
 const Button = styled.button`
-  width: 80px;
-  height: 40px;
-  background: #2f2f2f;
-  border-radius: 8px;
-  margin-top: 20px;
+  width: 100px;
+  height: 48px;
+  background: #00588c;
+  border-radius: 10px;
+  margin-top: 3px;
   text-align: center;
   color: white;
-`
+  cursor: pointer;
+`;
 
-const Text = styled.a`
+const SubHeader = styled.h1`
   position: relative;
-  fontfamily: Verdana;
-  fontweight: normal;
-  fontsize: 14px;
+  font-family: Verdana;
+  font-weight: bold;
+  font-size: 18px;
   text-align: center;
   width: 85%;
   line-height: 1.4;
   color: #000000;
-  margin: 0px 30px 20px 30px;
-`
+  /* margin: 0px 30px 20px 30px; */
+`;
+
+const Text = styled.a`
+  font-family: Verdana;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.4;
+  color: #000000;
+`;
+
+const PrimaryText = styled(Text)`
+  font-size: 11px;
+  font-weight: 100;
+  margin: 12px 0px;
+`;
 
 export default class CustomCover extends React.Component {
-  static contextType = WebchatContext
-  constructor(props) {
-    super(props)
-    this.state = {
-      name: '',
-      email: '',
-      error: false,
-    }
-  }
+  static contextType = WebchatContext;
 
   close() {
-    if (this.verifiedForm()) {
-      this.context.updateUser({
-        name: this.state.name,
-        extra_data: { email: this.state.email, hotels: [] },
-      })
-      this.context.sendText('Start')
-      this.props.closeComponent()
-    } else {
-      this.setState({ error: true })
-    }
-  }
-
-  verifiedForm() {
-    if (!this.incorrectName() && !this.incorrectEmail()) {
-      return true
-    }
-    return false
-  }
-
-  incorrectName() {
-    return this.state.name == ''
-  }
-
-  incorrectEmail() {
-    return !this.state.email.match(emailRegex) || this.state.email == ''
-  }
-
-  handleName = event => {
-    this.setState({ name: event.target.value })
-  }
-
-  handleEmail = event => {
-    this.setState({ email: event.target.value })
-    this.setState({ error: false })
+    this.props.closeComponent();
+    this.context.sendPayload(`text$${FIRST_FLOW_ID}`)
   }
 
   render() {
     return (
       <Container>
+        <SubHeader>Beep! I'm a chatbot</SubHeader>
         <Text>
-          Welcome to Botonic Booking Platform First of all, I would need your
-          name and email.
+          I will help you book your vacation <br /> ...maybe.
         </Text>
-        <MyTextField
-          required={true}
-          label='Name'
-          onChange={this.handleName}
-          value={this.state.name}
-          error={this.state.error && this.incorrectName()}
-        />
-        <MyTextField
-          required={true}
-          label='Email'
-          onChange={this.handleEmail}
-          value={this.state.email}
-          error={this.state.error && this.incorrectEmail()}
-          errorMessage={'Please use a valid Email format'}
-        />
-        <Button onClick={() => this.close()}>START</Button>
-        <p style={{ fontSize: 10 }}>
-          <em>
-            We will not store the fulfilled information. You can fake the data.
-          </em>
-        </p>
+        <PrimaryText>
+          I'm a robot, not a human, but will help <br /> you as best I can.
+        </PrimaryText>
+        <Button onClick={() => this.close()}>Get Started</Button>
       </Container>
-    )
+    );
   }
 }
